@@ -1,4 +1,5 @@
 require File.expand_path('easy_access_hash', File.dirname(__FILE__))
+require 'active_support'
 
 class DisambiguatedResult 
   attr_reader :original
