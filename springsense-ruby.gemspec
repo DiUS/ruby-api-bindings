@@ -6,11 +6,11 @@ Gem::Specification.new do |s|
   s.name        = "springsense-ruby"
   s.version     = Springsense::Ruby::VERSION
   s.platform    = Gem::Platform::RUBY
-  s.authors     = ["TODO: Write your name"]
-  s.email       = ["TODO: Write your email address"]
+  s.authors     = ["Tal Rotbart"]
+  s.email       = ["tal@springsense.com"]
   s.homepage    = ""
-  s.summary     = %q{TODO: Write a gem summary}
-  s.description = %q{TODO: Write a gem description}
+  s.summary     = %q{Ruby bindings for the SpringSense API}
+  s.description = %q{Ruby bindings for the SpringSense API. See http://springsense.com/api for more information}
 
   s.rubyforge_project = "springsense-ruby"
 
