@@ -2,7 +2,7 @@
 # and open the template in the editor.
 
 require File.expand_path(File.dirname(__FILE__) + '/../spec_helper')
-require File.expand_path(File.dirname(__FILE__) + '/../../lib/disambiguated_result')
+require File.expand_path(File.dirname(__FILE__) + '/../../lib/springsense-ruby/disambiguated_result')
 
 describe DisambiguatedSentence do
 

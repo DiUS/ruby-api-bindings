@@ -2,7 +2,7 @@
 # and open the template in the editor.
 
 require File.expand_path(File.dirname(__FILE__) + '/../spec_helper')
-require File.expand_path(File.dirname(__FILE__) + '/../../lib/easy_access_hash')
+require File.expand_path(File.dirname(__FILE__) + '/../../lib/springsense-ruby/easy_access_hash')
 
 describe EasyAccessHash do
 
