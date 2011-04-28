@@ -4,7 +4,7 @@ require "springsense-ruby/version"
 
 Gem::Specification.new do |s|
   s.name        = "springsense-ruby"
-  s.version     = Springsense::Ruby::VERSION
+  s.version     = SpringSense::Ruby::VERSION
   s.platform    = Gem::Platform::RUBY
   s.authors     = ["Tal Rotbart"]
   s.email       = ["tal@springsense.com"]
