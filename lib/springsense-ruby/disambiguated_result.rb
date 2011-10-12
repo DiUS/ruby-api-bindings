@@ -78,8 +78,14 @@ class DisambiguatedSentence
 
   def variants_text
     original.terms.map do | term |
-      ( term.meanings.blank? ? [ Array.new(scores.size) { term.word } ] : term.meanings.map { | h | h.meaning } ).flatten
+      ( term.meanings.blank? ? [ Array.new(scores.size) { term.word } ] : term.meanings.map { | h | 
+          (is_type?(h.meaning) ? "#{h.meaning} #{term.word.gsub(/_/, ' ')}"  : h.meaning)
+        } ).flatten
     end
+  end
+
+  def is_type?(meaning)
+    ["person_n_01", "association_n_01", "location_n_01"].include?(meaning)
   end
 
   def sentence_variants

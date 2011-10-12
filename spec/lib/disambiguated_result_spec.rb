@@ -63,6 +63,21 @@ RESPONSE
 
   end
 
+  describe "when has person/association" do
+    before :each do
+      @sentence_json = <<SENTENCE_JSON
+[{"terms": [{"lemma": "Steve_Jobs", "word": "Steve_Jobs", "POS": "NNP", "meanings": [{"definition": "a human being", "meaning": "person_n_01"}, {"definition": "a workplace; as in the expression 'on the job'; ", "meaning": "job_n_03"}, {"definition": "A person, institution or place name called 'Steve Jobs'", "meaning": "Steve_Jobs_n_01"}]}], "scores": [0.33333340921091204, 0.33333334712849727, 0.33333324366059075]}]
+SENTENCE_JSON
+
+      @sentence = DisambiguatedSentence.new(ActiveSupport::JSON.decode(@sentence_json)[0]);
+    end
+
+    it "#sentence_variants should work correct" do
+      @sentence.sentence_variants.should eql(["person_n_01 Steve Jobs", "job_n_03", "Steve_Jobs_n_01"])
+    end
+
+  end
+
 end
 
 describe DisambiguatedResult do
@@ -107,7 +122,7 @@ RESPONSE2
 
     it "#text_variants_in_rank_order should return the aggregated senteces in simple form" do
       @result.text_variants_in_rank_order.should eql(
-        ["dish_n_01 , very hot fat .\nSend them into another one can make little feculina flour_n_01 .\npulse_n_02 them through the sieve_n_01 , return_n_11 them down tender_n_01 out in water_n_01 for a stew-pan in this is well some cold_water_n_01 , and a puree_n_01 with all , and in a shallow lawsuit_n_01 must already salted body_of_water_n_01 or location_n_01 .\nYou will hold your omelet_n_01 , so as you wish to it , retention_n_01 hot cup_of_tea_n_01 .\nA quart_n_01 of a half a lemon_n_01 .\nThis dish_n_01 is good white crumb_n_03 of crumb_n_03 of carrot_n_01 ; then peel_n_02 them for five leaves and five flat in the meat_n_01 must exhibit_n_01 the same measure_n_02", "dish_n_02 , very hot fat .\nSend them into another one can make little feculina flour_n_01 .\npulse_n_02 them through the sieve_n_01 , return_n_11 them down tender_n_01 out in water_n_01 for a stew-pan in this is well some cold_water_n_01 , and a puree_n_01 with all , and in a shallow case_n_01 must already salted body_of_water_n_01 or location_n_01 .\nYou will hold your omelet_n_01 , so as you wish to it , retention_n_01 hot dish_n_01 .\nA quart_n_01 of a half a lemon_n_03 .\nThis dish_n_01 is good white crumb_n_03 of crumb_n_03 of carrot_n_02 ; then peel_n_02 them for five leaves and five flat in the meat_n_01 must exhibit_n_01 the same measure_n_02", "dish_n_03 , very hot fat .\nSend them into another one can make little feculina flour_n_01 .\npulse_n_02 them through the sieve_n_01 , return_n_11 them down seal_n_02 out in water_n_01 for a stew-pan in this is well some cold_water_n_01 , and a puree_n_01 with all , and in a shallow lawsuit_n_01 must already salted body_of_water_n_01 or location_n_01 .\nYou will hold your omelet_n_01 , so as you wish to it , guardianship_n_02 hot dish_n_01 .\nA quart_n_01 of a half a lemon_n_04 .\nThis dish_n_02 is good white crumb_n_03 of crumb_n_03 of carrot_n_01 ; then peel_n_02 them for five leaves and five flat in the meat_n_01 must exhibit_n_01 the same measure_n_02"]
+        ["dish_n_01 , very hot fat .\nSend them into another one can make little feculina flour_n_01 .\npulse_n_02 them through the sieve_n_01 , return_n_11 them down tender_n_01 out in water_n_01 for a stew-pan in this is well some cold_water_n_01 , and a puree_n_01 with all , and in a shallow lawsuit_n_01 must already salted body_of_water_n_01 or location_n_01 Liebig .\nYou will hold your omelet_n_01 , so as you wish to it , retention_n_01 hot cup_of_tea_n_01 .\nA quart_n_01 of a half a lemon_n_01 .\nThis dish_n_01 is good white crumb_n_03 of crumb_n_03 of carrot_n_01 ; then peel_n_02 them for five leaves and five flat in the meat_n_01 must exhibit_n_01 the same measure_n_02", "dish_n_02 , very hot fat .\nSend them into another one can make little feculina flour_n_01 .\npulse_n_02 them through the sieve_n_01 , return_n_11 them down tender_n_01 out in water_n_01 for a stew-pan in this is well some cold_water_n_01 , and a puree_n_01 with all , and in a shallow case_n_01 must already salted body_of_water_n_01 or location_n_01 Liebig .\nYou will hold your omelet_n_01 , so as you wish to it , retention_n_01 hot dish_n_01 .\nA quart_n_01 of a half a lemon_n_03 .\nThis dish_n_01 is good white crumb_n_03 of crumb_n_03 of carrot_n_02 ; then peel_n_02 them for five leaves and five flat in the meat_n_01 must exhibit_n_01 the same measure_n_02", "dish_n_03 , very hot fat .\nSend them into another one can make little feculina flour_n_01 .\npulse_n_02 them through the sieve_n_01 , return_n_11 them down seal_n_02 out in water_n_01 for a stew-pan in this is well some cold_water_n_01 , and a puree_n_01 with all , and in a shallow lawsuit_n_01 must already salted body_of_water_n_01 or location_n_01 Liebig .\nYou will hold your omelet_n_01 , so as you wish to it , guardianship_n_02 hot dish_n_01 .\nA quart_n_01 of a half a lemon_n_04 .\nThis dish_n_02 is good white crumb_n_03 of crumb_n_03 of carrot_n_01 ; then peel_n_02 them for five leaves and five flat in the meat_n_01 must exhibit_n_01 the same measure_n_02"]
       )
     end
 
