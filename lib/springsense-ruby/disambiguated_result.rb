@@ -79,7 +79,7 @@ class DisambiguatedSentence
   def variants_text
     original.terms.map do | term |
       ( term.meanings.blank? ? [ Array.new(scores.size) { term.word } ] : term.meanings.map { | h | 
-          (is_type?(h.meaning) ? "#{h.meaning} #{term.word.gsub(/_/, ' ')}"  : h.meaning)
+          (is_type?(h.meaning) ? term.word.gsub(/_/, ' ') : h.meaning)
         } ).flatten
     end
   end
