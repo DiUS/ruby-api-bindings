@@ -36,7 +36,7 @@ class Disambiguator
     params[:api_key] = api_key unless api_key.nil?
     params[:customer_id] = customer_id unless customer_id.nil?
     
-    params_s = self.encode_parameters(params)
+    params_s = encode_parameters(params)
     
     Net::HTTP.start(@address, @port) do |client|
       client.open_timeout = 120
