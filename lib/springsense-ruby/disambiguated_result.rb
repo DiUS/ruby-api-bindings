@@ -71,12 +71,9 @@ class DisambiguatedSentence
   end
 
   def variants
-    result = []
     original.terms.map do | term | 
       (Array.new(scores.size > 0 ? scores.size : 1) { | i | ResolvedTerm.new(term, i) }).flatten
-    end.transpose.each_with_index { | array_of_resolved_terms, i | result << ResolvedSentence.new(array_of_resolved_terms, scores[i], i)  } 
-    
-    result
+    end.transpose.each_with_index.map { | array_of_resolved_terms, i | ResolvedSentence.new(array_of_resolved_terms, scores[i] || 1.0, i)  } 
   end
 
   def variants_text

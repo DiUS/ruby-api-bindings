@@ -69,6 +69,8 @@ RESPONSE
     it "#variants should return one sentence variant" do
       @sentence.variants.should_not eql([])
       @sentence.variants.should eql([[{"word"=>"All", "lemma"=>"All", "POS"=>"DT"}, {"word"=>"genuflect", "lemma"=>"genuflect", "POS"=>"VB"}, {"word"=>"before", "lemma"=>"before", "POS"=>"IN"}, {"word"=>"me", "lemma"=>"me", "POS"=>"PRP"}]])
+      @sentence.variants.map(&:score).should eql([1.0])
+      @sentence.variants.map(&:index).should eql([0])
     end
 
   end
