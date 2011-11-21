@@ -80,13 +80,7 @@ class DisambiguatedSentence
   end
 
   def variants_text
-    variants.map() do | variant |
-       variant.map(&:to_s)
-    end
-  end
-
-  def is_type?(meaning)
-    ["person_n_01", "association_n_01", "location_n_01"].include?(meaning)
+    variants.map() { | variant | variant.map(&:to_s) }
   end
 
   def sentence_variants
