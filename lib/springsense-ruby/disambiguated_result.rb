@@ -71,16 +71,17 @@ class DisambiguatedSentence
   end
 
   def variants
-    original.terms.map do | term |
-      ( term.meanings.blank? ? Array.new(scores.size > 0 ? scores.size : 1) { term.except('meanings') } : Array.new(scores.size) { | i | clone = term.except('meanings'); clone.meaning = term.meanings[i].meaning; clone.definition = term.meanings[i].definition; clone } ).flatten
-    end.transpose
+    result = []
+    original.terms.map do | term | 
+      (Array.new(scores.size > 0 ? scores.size : 1) { | i | ResolvedTerm.new(term, i) }).flatten
+    end.transpose.each_with_index { | array_of_resolved_terms, i | result << ResolvedSentence.new(array_of_resolved_terms, scores[i], i)  } 
+    
+    result
   end
 
   def variants_text
-    original.terms.map do | term |
-      ( term.meanings.blank? ? [ Array.new(scores.size) { term.word } ] : term.meanings.map { | h | 
-          (is_type?(h.meaning) ? term.word.gsub(/_/, ' ') : h.meaning)
-        } ).flatten
+    variants.map() do | variant |
+       variant.map(&:to_s)
     end
   end
 
@@ -89,7 +90,53 @@ class DisambiguatedSentence
   end
 
   def sentence_variants
-    variants_text.transpose.map { | s | s.join(' ') }
+    variants_text.map { | s | s.join(' ') }
   end
 
+end
+
+class ResolvedSentence < Array
+  attr_accessor :score
+  attr_accessor :index
+  
+  def initialize(resolved_terms, score, i)
+    super()
+    
+    self.push(*resolved_terms)
+    @score = score
+    @index = i
+  end
+  
+end
+
+class ResolvedTerm < Hash
+  
+  def initialize(term, i)
+    super()
+    
+    self.merge!(term.except('meanings'))
+    
+    if (term.meanings.count > i)
+      self.meaning = term.meanings[i].meaning; 
+      self.definition = term.meanings[i].definition;
+    end
+    
+    self
+  end
+  
+  def to_s()
+    return self.word unless has_meaning?
+    
+    return self.word.gsub(/_/, ' ') if is_type?
+    
+    self.meaning
+  end
+  
+  def has_meaning?()
+    !self['meaning'].blank?
+  end
+
+  def is_type?
+    ["person_n_01", "association_n_01", "location_n_01"].include?(self.meaning.to_s)
+  end
 end

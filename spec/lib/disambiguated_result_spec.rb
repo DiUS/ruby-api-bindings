@@ -22,6 +22,11 @@ SENTENCE_JSON
 
     it "#variants should return sentences as separated variants" do
       @sentence.variants.should eql([[{"word"=>"Send", "lemma"=>"Send", "POS"=>"VB"}, {"word"=>"them", "lemma"=>"them", "POS"=>"PRP"}, {"word"=>"into", "lemma"=>"into", "POS"=>"IN"}, {"word"=>"another", "lemma"=>"another", "POS"=>"DT"}, {"word"=>"one", "lemma"=>"one", "POS"=>"CD"}, {"word"=>"can", "lemma"=>"can", "POS"=>"MD"}, {"word"=>"make", "lemma"=>"make", "POS"=>"VB"}, {"word"=>"little", "lemma"=>"little", "POS"=>"JJ"}, {"word"=>"feculina", "lemma"=>"feculina", "POS"=>"NN"}, {"meaning"=>"flour_n_01", "word"=>"flour", "definition"=>"fine powdery foodstuff obtained by grinding and sifting the meal of a cereal grain", "lemma"=>"flour", "POS"=>"NN"}, {"word"=>".", "lemma"=>".", "POS"=>"."}]])
+      
+      @sentence.variants.map(&:score).should eql([1.0])
+      @sentence.variants.map(&:index).should eql([0])
+
+      @sentence.variants_text.should eql([["Send", "them", "into", "another", "one", "can", "make", "little", "feculina", "flour_n_01", "."]])
     end
 
   end
@@ -40,6 +45,11 @@ RESPONSE
 
     it "#variants should return sentences as separated variants" do
       @sentence.variants.should eql([[{"meaning"=>"cat_n_01", "word"=>"cat", "definition"=>"feline mammal usually having thick soft fur and no ability to roar: domestic cats; wildcats", "lemma"=>"cat", "POS"=>"NN"}, {"word"=>"in", "lemma"=>"in", "POS"=>"IN"}, {"word"=>"the", "lemma"=>"the", "POS"=>"DT"}, {"meaning"=>"hat_n_01", "word"=>"hat", "definition"=>"headdress that protects the head from bad weather; has shaped crown and usually a brim", "lemma"=>"hat", "POS"=>"NN"}, {"word"=>".", "lemma"=>".", "POS"=>"."}], [{"meaning"=>"cat_n_03", "word"=>"cat", "definition"=>"a spiteful woman gossip", "lemma"=>"cat", "POS"=>"NN"}, {"word"=>"in", "lemma"=>"in", "POS"=>"IN"}, {"word"=>"the", "lemma"=>"the", "POS"=>"DT"}, {"meaning"=>"hat_n_01", "word"=>"hat", "definition"=>"headdress that protects the head from bad weather; has shaped crown and usually a brim", "lemma"=>"hat", "POS"=>"NN"}, {"word"=>".", "lemma"=>".", "POS"=>"."}], [{"meaning"=>"guy_n_01", "word"=>"cat", "definition"=>"an informal term for a youth or man", "lemma"=>"cat", "POS"=>"NN"}, {"word"=>"in", "lemma"=>"in", "POS"=>"IN"}, {"word"=>"the", "lemma"=>"the", "POS"=>"DT"}, {"meaning"=>"hat_n_01", "word"=>"hat", "definition"=>"headdress that protects the head from bad weather; has shaped crown and usually a brim", "lemma"=>"hat", "POS"=>"NN"}, {"word"=>".", "lemma"=>".", "POS"=>"."}]])
+      
+      @sentence.variants.map(&:score).should eql([0.76837408228704862, 0.13442297720000657, 0.09720294051294473])
+      @sentence.variants.map(&:index).should eql([0, 1, 2])
+      
+      @sentence.variants_text.should eql([["cat_n_01", "in", "the", "hat_n_01", "."], ["cat_n_03", "in", "the", "hat_n_01", "."], ["guy_n_01", "in", "the", "hat_n_01", "."]])
     end
 
   end
