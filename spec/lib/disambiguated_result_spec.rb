@@ -102,20 +102,20 @@ RESPONSE
             },
           })
           
-        fake_neighbours.expand('cat_n_01', 3, 0.8).should eql(
+        fake_neighbours.expand('cat_n_01', 3, 0.8).sort.should eql(
           [
             'cat_expanded_1', 
             'cat_expanded_2',
             'cat_expanded_3',  
-            ]
+            ].sort
           )
           
-        @first_variant[0].expand(fake_neighbours, 3, 0.8).should eql(
+        @first_variant[0].expand(fake_neighbours, 3, 0.8).sort {|x,y| y.to_s <=> x.to_s }.should eql(
           [
             { 'lemma' => 'expansion', 'word' => 'expansion', 'POS'=>'NN', 'meaning' => 'cat_expanded_1' }, 
             { 'lemma' => 'expansion', 'word' => 'expansion', 'POS'=>'NN', 'meaning' => 'cat_expanded_2' }, 
             { 'lemma' => 'expansion', 'word' => 'expansion', 'POS'=>'NN', 'meaning' => 'cat_expanded_3' }, 
-          ])
+          ].sort {|x,y| y.to_s <=> x.to_s })
           
         expected_result = 
             [

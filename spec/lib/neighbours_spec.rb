@@ -21,11 +21,11 @@ describe Neighbours do
 
   it "should expand correctly" do 
     
-    @neighbours.expand('profiling_n_01', 2, 0.8).should eql(
+    @neighbours.expand('profiling_n_01', 2, 0.8).sort.should eql(
       [
         'identification_n_02',
         'linguistic_profiling_n_01',
-      ])
+      ].sort)
   end
       
 end
