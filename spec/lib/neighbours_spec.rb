@@ -6,7 +6,7 @@ require File.expand_path(File.dirname(__FILE__) + '/../../lib/springsense-ruby/n
 describe Neighbours do
   
   before :all do
-    @neighbours = Neighbours.new( 
+    @neighbours = Neighbours.from_csv( 
         File.join(
           File.expand_path(File.dirname(__FILE__)), 
           'test_neighbours.csv'

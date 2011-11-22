@@ -98,6 +98,32 @@ class ResolvedSentence < Array
     @index = i
   end
   
+  def expand(neighbours, max_expansions, max_radius)
+    indent = (1...(6 - count)).map { | i | "\t" }.join('')
+    
+    results = [ self ]
+    self.each_with_index do | resolved_term, i |  
+      expansions = resolved_term.expand(neighbours, max_expansions, max_radius)
+      
+      base = results.clone
+      expansions.each_with_index do | expansion, j |
+        new_results = base.map do | existing_result |
+          new_variant = existing_result.clone
+          new_variant[i] = expansion
+            
+          results << new_variant
+        end
+        
+        #results.push(*new_results)
+      end
+    end
+    
+    results #.map() { | arr | ResolvedSentence.new(arr, score, index) }
+  end
+  
+  def to_s
+    self.map(&:to_s).join(' ')
+  end
 end
 
 class ResolvedTerm < Hash
@@ -107,7 +133,7 @@ class ResolvedTerm < Hash
     
     self.merge!(term.except('meanings'))
     
-    if (term.meanings.count > i)
+    if term['meanings'] and (term.meanings.count > i)
       self.meaning = term.meanings[i].meaning; 
       self.definition = term.meanings[i].definition;
     end
@@ -121,6 +147,24 @@ class ResolvedTerm < Hash
     return self.word.gsub(/_/, ' ') if is_type?
     
     self.meaning
+  end
+  
+  def expand(neighbours, max_expansions, max_radius)
+    return [] unless has_meaning?
+    
+    expansion = neighbours.expand(meaning, max_expansions, max_radius)
+    
+    return [] if expansion.blank?
+    
+    expansion.each_with_index.map do | noun, i |
+      ResolvedTerm.new(self.except('definition').merge(
+        {
+            'lemma' => 'expansion', 
+            'word' => 'expansion',           
+            'meaning' => noun
+        }
+      ), i)
+    end
   end
   
   def has_meaning?()

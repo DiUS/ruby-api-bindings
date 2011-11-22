@@ -2,8 +2,14 @@ require 'csv'
 
 class Neighbours < Hash
   
-  def initialize(csv_file_path)
-    load_from_csv(csv_file_path)
+  def initialize(orig = {})
+    self.merge!(orig)
+  end
+  
+  def self.from_csv(csv_file_path)
+    neighbours = Neighbours.new.load_from_csv(csv_file_path)
+    
+    neighbours
   end
   
   def load_from_csv(csv_file_path)
@@ -19,6 +25,8 @@ class Neighbours < Hash
         self[key] = nouns
       end
     end
+    
+    self
   end
   
   def expand(noun, max_expansions, max_radius)

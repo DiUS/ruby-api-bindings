@@ -14,6 +14,8 @@ describe DisambiguatedSentence do
 SENTENCE_JSON
 
       @sentence = DisambiguatedSentence.new(ActiveSupport::JSON.decode(@sentence_json)[1]);
+
+      @first_variant = @sentence.variants.first      
     end
 
     it "#sentence_variants should work correct" do
@@ -29,6 +31,27 @@ SENTENCE_JSON
       @sentence.variants_text.should eql([["Send", "them", "into", "another", "one", "can", "make", "little", "feculina", "flour_n_01", "."]])
     end
 
+    it "variant #expand should work correctly" do
+        fake_neighbours = Neighbours.new({ 
+            'flour_n_01' => {
+              0.5 => 'flour_expanded_1', 
+              0.75 => 'flour_expanded_2',
+              0.76 =>  'flour_expanded_3',
+            },
+          })
+          
+        expected_result = 
+            [
+              "Send them into another one can make little feculina flour_n_01 .",
+              "Send them into another one can make little feculina flour_expanded_1 .",
+              "Send them into another one can make little feculina flour_expanded_2 .",
+              "Send them into another one can make little feculina flour_expanded_3 .",
+            ].map(&:to_s)
+            
+        actual_result = @first_variant.expand(fake_neighbours, 3, 0.8).map(&:to_s)
+          
+        actual_result.should eql(expected_result)
+    end    
   end
 
   describe "when has several disambiguations" do
@@ -41,6 +64,7 @@ RESPONSE
       @result = DisambiguatedResult.from_response(@response)
 
       @sentence = @result.sentences.first
+      @first_variant = @sentence.variants.first      
     end
 
     it "#variants should return sentences as separated variants" do
@@ -52,6 +76,72 @@ RESPONSE
       @sentence.variants_text.should eql([["cat_n_01", "in", "the", "hat_n_01", "."], ["cat_n_03", "in", "the", "hat_n_01", "."], ["guy_n_01", "in", "the", "hat_n_01", "."]])
     end
 
+    it "#variants should work correctly" do
+
+        @first_variant.should eql(
+          [
+            {"lemma"=>"cat", "word"=>"cat", "POS"=>"NN", "meaning"=>"cat_n_01", "definition"=>"feline mammal usually having thick soft fur and no ability to roar: domestic cats; wildcats"}, 
+            {"lemma"=>"in", "word"=>"in", "POS"=>"IN"}, 
+            {"lemma"=>"the", "word"=>"the", "POS"=>"DT"}, 
+            {"lemma"=>"hat", "word"=>"hat", "POS"=>"NN", "meaning"=>"hat_n_01", "definition"=>"headdress that protects the head from bad weather; has shaped crown and usually a brim"}, 
+            {"lemma"=>".", "word"=>".", "POS"=>"."}
+            ])
+    end    
+    
+    it "variant #expand should work correctly" do
+        fake_neighbours = Neighbours.new({ 
+            'cat_n_01' => {
+              0.5 => 'cat_expanded_1', 
+              0.75 => 'cat_expanded_2',
+              0.76 =>  'cat_expanded_3',
+            },
+            'hat_n_01' => {
+              0.5 => 'hat_expanded_1', 
+              0.75 => 'hat_expanded_2',
+              0.9 => 'hat_shouldnt_expand_1'
+            },
+          })
+          
+        fake_neighbours.expand('cat_n_01', 3, 0.8).should eql(
+          [
+            'cat_expanded_1', 
+            'cat_expanded_2',
+            'cat_expanded_3',  
+            ]
+          )
+          
+        @first_variant[0].expand(fake_neighbours, 3, 0.8).should eql(
+          [
+            { 'lemma' => 'expansion', 'word' => 'expansion', 'POS'=>'NN', 'meaning' => 'cat_expanded_1' }, 
+            { 'lemma' => 'expansion', 'word' => 'expansion', 'POS'=>'NN', 'meaning' => 'cat_expanded_2' }, 
+            { 'lemma' => 'expansion', 'word' => 'expansion', 'POS'=>'NN', 'meaning' => 'cat_expanded_3' }, 
+          ])
+          
+        expected_result = 
+            [
+              expected_expansion('cat_n_01', 'hat_n_01'),          
+              expected_expansion('cat_expanded_1', 'hat_n_01'),          
+              expected_expansion('cat_expanded_2', 'hat_n_01'),          
+              expected_expansion('cat_expanded_3', 'hat_n_01'),          
+              expected_expansion('cat_n_01', 'hat_expanded_1'),          
+              expected_expansion('cat_expanded_1', 'hat_expanded_1'),          
+              expected_expansion('cat_expanded_2', 'hat_expanded_1'),          
+              expected_expansion('cat_expanded_3', 'hat_expanded_1'),          
+              expected_expansion('cat_n_01', 'hat_expanded_2'),          
+              expected_expansion('cat_expanded_1', 'hat_expanded_2'),          
+              expected_expansion('cat_expanded_2', 'hat_expanded_2'),          
+              expected_expansion('cat_expanded_3', 'hat_expanded_2'),          
+            ].map(&:to_s)
+            
+        actual_result = @first_variant.expand(fake_neighbours, 3, 0.8).map(&:to_s)
+          
+        actual_result.should eql(expected_result)
+    end    
+    
+    def expected_expansion(expanded_term1, expanded_term2)
+      "#{expanded_term1} in the #{expanded_term2} ."
+    end
+    
   end
 
   describe "when has no disambiguations" do
