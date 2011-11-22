@@ -46,9 +46,9 @@ SENTENCE_JSON
               "Send them into another one can make little feculina flour_expanded_1 .",
               "Send them into another one can make little feculina flour_expanded_2 .",
               "Send them into another one can make little feculina flour_expanded_3 .",
-            ].map(&:to_s)
+            ].sort
             
-        actual_result = @first_variant.expand(fake_neighbours, 3, 0.8).map(&:to_s)
+        actual_result = @first_variant.expand(fake_neighbours, 3, 0.8).map(&:to_s).sort
           
         actual_result.should eql(expected_result)
     end    
@@ -131,9 +131,9 @@ RESPONSE
               expected_expansion('cat_expanded_1', 'hat_expanded_2'),          
               expected_expansion('cat_expanded_2', 'hat_expanded_2'),          
               expected_expansion('cat_expanded_3', 'hat_expanded_2'),          
-            ].map(&:to_s)
+            ].sort
             
-        actual_result = @first_variant.expand(fake_neighbours, 3, 0.8).map(&:to_s)
+        actual_result = @first_variant.expand(fake_neighbours, 3, 0.8).map(&:to_s).sort
           
         actual_result.should eql(expected_result)
     end    
