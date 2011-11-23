@@ -165,6 +165,29 @@ RESPONSE
 
   end
 
+  describe "when has no disambiguations: ingham" do
+    before :each do
+      @response = # Text: 'ingham'
+        <<RESPONSE
+[{"terms":[{"term":"ingham","lemma":"ingham","word":"ingham","POS":"NN","offset":0,"meanings":[]}],"scores":[]}]
+RESPONSE
+
+      @result = DisambiguatedResult.from_response(@response)
+
+      @sentence = @result.sentences.first
+    end
+
+    it "#variants should return one sentence variant" do
+      @sentence.variants.should_not eql([])
+      @sentence.variants.should eql([[{"term"=>"ingham", "lemma"=>"ingham", "word"=>"ingham", "POS"=>"NN", "offset"=>0}]])
+      @sentence.variants.map(&:score).should eql([1.0])
+      @sentence.variants.map(&:index).should eql([0])
+    end
+
+  end
+
+
+
   describe "when has person/association" do
     before :each do
       @sentence_json = <<SENTENCE_JSON
