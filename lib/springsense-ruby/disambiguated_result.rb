@@ -98,11 +98,11 @@ class ResolvedSentence < Array
     @index = i
   end
   
-  def expand(neighbours, max_expansions, max_radius)
+  def expand(neighbours, max_expansions, max_radius, max_terms=nil)
     indent = (1...(6 - count)).map { | i | "\t" }.join('')
     
     results = [ self ]
-    self.each_with_index do | resolved_term, i |  
+    self.slice(0, max_terms.nil? ? self.size : [self.size, max_terms].min).each_with_index do | resolved_term, i |  
       expansions = resolved_term.expand(neighbours, max_expansions, max_radius)
       
       base = results.clone

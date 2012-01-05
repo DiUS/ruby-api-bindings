@@ -134,8 +134,11 @@ RESPONSE
             ].sort
             
         actual_result = @first_variant.expand(fake_neighbours, 3, 0.8).map(&:to_s).sort
-          
         actual_result.should eql(expected_result)
+        
+        actual_result = @first_variant.expand(fake_neighbours, 3, 0.8, 1).map(&:to_s).sort
+        actual_result.should eql(["cat_expanded_1 in the hat_n_01 .", "cat_expanded_2 in the hat_n_01 .", "cat_expanded_3 in the hat_n_01 .", "cat_n_01 in the hat_n_01 ."])
+        
     end    
     
     def expected_expansion(expanded_term1, expanded_term2)
