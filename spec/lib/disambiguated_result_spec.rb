@@ -23,7 +23,7 @@ SENTENCE_JSON
     end
 
     it "#variants should return sentences as separated variants" do
-      @sentence.variants.should eql([[{"word"=>"Send", "lemma"=>"Send", "POS"=>"VB"}, {"word"=>"them", "lemma"=>"them", "POS"=>"PRP"}, {"word"=>"into", "lemma"=>"into", "POS"=>"IN"}, {"word"=>"another", "lemma"=>"another", "POS"=>"DT"}, {"word"=>"one", "lemma"=>"one", "POS"=>"CD"}, {"word"=>"can", "lemma"=>"can", "POS"=>"MD"}, {"word"=>"make", "lemma"=>"make", "POS"=>"VB"}, {"word"=>"little", "lemma"=>"little", "POS"=>"JJ"}, {"word"=>"feculina", "lemma"=>"feculina", "POS"=>"NN"}, {"meaning"=>"flour_n_01", "word"=>"flour", "definition"=>"fine powdery foodstuff obtained by grinding and sifting the meal of a cereal grain", "lemma"=>"flour", "POS"=>"NN"}, {"word"=>".", "lemma"=>".", "POS"=>"."}]])
+      @sentence.variants.should eql([[{"lemma"=>"Send", "word"=>"Send", "POS"=>"VB", "score"=>1.0}, {"lemma"=>"them", "word"=>"them", "POS"=>"PRP", "score"=>1.0}, {"lemma"=>"into", "word"=>"into", "POS"=>"IN", "score"=>1.0}, {"lemma"=>"another", "word"=>"another", "POS"=>"DT", "score"=>1.0}, {"lemma"=>"one", "word"=>"one", "POS"=>"CD", "score"=>1.0}, {"lemma"=>"can", "word"=>"can", "POS"=>"MD", "score"=>1.0}, {"lemma"=>"make", "word"=>"make", "POS"=>"VB", "score"=>1.0}, {"lemma"=>"little", "word"=>"little", "POS"=>"JJ", "score"=>1.0}, {"lemma"=>"feculina", "word"=>"feculina", "POS"=>"NN", "score"=>1.0}, {"lemma"=>"flour", "word"=>"flour", "POS"=>"NN", "score"=>1.0, "meaning"=>"flour_n_01", "definition"=>"fine powdery foodstuff obtained by grinding and sifting the meal of a cereal grain"}, {"lemma"=>".", "word"=>".", "POS"=>".", "score"=>1.0}]])
       
       @sentence.variants.map(&:score).should eql([1.0])
       @sentence.variants.map(&:index).should eql([0])
@@ -54,6 +54,42 @@ SENTENCE_JSON
     end    
   end
 
+    describe "when has several disambiguations that share resolved terms" do
+      before :each do
+        @response = # for 'cat vet'
+          <<RESPONSE
+[{"terms":[{"term":"cat","lemma":"cat","word":"cat","POS":"NN","offset":0,"meanings":[{"definition":"feline mammal usually having thick soft fur and no ability to roar: domestic cats; wildcats","meaning":"cat_n_01"},{"definition":"any of several large cats typically able to roar and living in the wild","meaning":"big_cat_n_01"},{"definition":"any of several large cats typically able to roar and living in the wild","meaning":"big_cat_n_01"}]},{"term":"vet","lemma":"vet","word":"vet","POS":"NN","offset":4,"meanings":[{"definition":"a doctor who practices veterinary medicine","meaning":"veterinarian_n_01"},{"definition":"a person who has served in the armed forces","meaning":"veteran_n_02"},{"definition":"a doctor who practices veterinary medicine","meaning":"veterinarian_n_01"}]}],"scores":[0.33435383605446267,0.33293809775423155,0.3327080661913058]}]
+RESPONSE
+
+        @result = DisambiguatedResult.from_response(@response)
+
+        @sentence = @result.sentences.first
+        @first_variant = @sentence.variants.first      
+      end
+    
+    context "resolved terms" do
+      
+      it "should have correct aggregate scores" do
+        resolved_term_cat_n_01 = @first_variant[0]
+        
+        resolved_term_cat_n_01.word.should eql("cat")
+        resolved_term_cat_n_01.meaning.should eql("cat_n_01")
+        resolved_term_cat_n_01.score.should eql(0.33435383605446267)
+
+        resolved_term_veterinarian_n_01 = @first_variant[1]
+        
+        resolved_term_veterinarian_n_01.should == @sentence.variants.last[1]
+        resolved_term_veterinarian_n_01.word.should eql("vet")
+        resolved_term_veterinarian_n_01.meaning.should eql("veterinarian_n_01")
+        resolved_term_veterinarian_n_01.score.should eql(0.33435383605446267 + 0.3327080661913058)
+      end
+      
+    end
+
+  end
+  
+  
+  
   describe "when has several disambiguations" do
     before :each do
       @response =
@@ -68,7 +104,7 @@ RESPONSE
     end
 
     it "#variants should return sentences as separated variants" do
-      @sentence.variants.should eql([[{"meaning"=>"cat_n_01", "word"=>"cat", "definition"=>"feline mammal usually having thick soft fur and no ability to roar: domestic cats; wildcats", "lemma"=>"cat", "POS"=>"NN"}, {"word"=>"in", "lemma"=>"in", "POS"=>"IN"}, {"word"=>"the", "lemma"=>"the", "POS"=>"DT"}, {"meaning"=>"hat_n_01", "word"=>"hat", "definition"=>"headdress that protects the head from bad weather; has shaped crown and usually a brim", "lemma"=>"hat", "POS"=>"NN"}, {"word"=>".", "lemma"=>".", "POS"=>"."}], [{"meaning"=>"cat_n_03", "word"=>"cat", "definition"=>"a spiteful woman gossip", "lemma"=>"cat", "POS"=>"NN"}, {"word"=>"in", "lemma"=>"in", "POS"=>"IN"}, {"word"=>"the", "lemma"=>"the", "POS"=>"DT"}, {"meaning"=>"hat_n_01", "word"=>"hat", "definition"=>"headdress that protects the head from bad weather; has shaped crown and usually a brim", "lemma"=>"hat", "POS"=>"NN"}, {"word"=>".", "lemma"=>".", "POS"=>"."}], [{"meaning"=>"guy_n_01", "word"=>"cat", "definition"=>"an informal term for a youth or man", "lemma"=>"cat", "POS"=>"NN"}, {"word"=>"in", "lemma"=>"in", "POS"=>"IN"}, {"word"=>"the", "lemma"=>"the", "POS"=>"DT"}, {"meaning"=>"hat_n_01", "word"=>"hat", "definition"=>"headdress that protects the head from bad weather; has shaped crown and usually a brim", "lemma"=>"hat", "POS"=>"NN"}, {"word"=>".", "lemma"=>".", "POS"=>"."}]])
+      @sentence.variants.should eql([[{"lemma"=>"cat", "word"=>"cat", "POS"=>"NN", "score"=>0.7683740822870486, "meaning"=>"cat_n_01", "definition"=>"feline mammal usually having thick soft fur and no ability to roar: domestic cats; wildcats"}, {"lemma"=>"in", "word"=>"in", "POS"=>"IN", "score"=>0.9999999999999999}, {"lemma"=>"the", "word"=>"the", "POS"=>"DT", "score"=>0.9999999999999999}, {"lemma"=>"hat", "word"=>"hat", "POS"=>"NN", "score"=>0.9999999999999999, "meaning"=>"hat_n_01", "definition"=>"headdress that protects the head from bad weather; has shaped crown and usually a brim"}, {"lemma"=>".", "word"=>".", "POS"=>".", "score"=>0.9999999999999999}], [{"lemma"=>"cat", "word"=>"cat", "POS"=>"NN", "score"=>0.13442297720000657, "meaning"=>"cat_n_03", "definition"=>"a spiteful woman gossip"}, {"lemma"=>"in", "word"=>"in", "POS"=>"IN", "score"=>0.9999999999999999}, {"lemma"=>"the", "word"=>"the", "POS"=>"DT", "score"=>0.9999999999999999}, {"lemma"=>"hat", "word"=>"hat", "POS"=>"NN", "score"=>0.9999999999999999, "meaning"=>"hat_n_01", "definition"=>"headdress that protects the head from bad weather; has shaped crown and usually a brim"}, {"lemma"=>".", "word"=>".", "POS"=>".", "score"=>0.9999999999999999}], [{"lemma"=>"cat", "word"=>"cat", "POS"=>"NN", "score"=>0.09720294051294473, "meaning"=>"guy_n_01", "definition"=>"an informal term for a youth or man"}, {"lemma"=>"in", "word"=>"in", "POS"=>"IN", "score"=>0.9999999999999999}, {"lemma"=>"the", "word"=>"the", "POS"=>"DT", "score"=>0.9999999999999999}, {"lemma"=>"hat", "word"=>"hat", "POS"=>"NN", "score"=>0.9999999999999999, "meaning"=>"hat_n_01", "definition"=>"headdress that protects the head from bad weather; has shaped crown and usually a brim"}, {"lemma"=>".", "word"=>".", "POS"=>".", "score"=>0.9999999999999999}]])
       
       @sentence.variants.map(&:score).should eql([0.76837408228704862, 0.13442297720000657, 0.09720294051294473])
       @sentence.variants.map(&:index).should eql([0, 1, 2])
@@ -80,11 +116,11 @@ RESPONSE
 
         @first_variant.should eql(
           [
-            {"lemma"=>"cat", "word"=>"cat", "POS"=>"NN", "meaning"=>"cat_n_01", "definition"=>"feline mammal usually having thick soft fur and no ability to roar: domestic cats; wildcats"}, 
-            {"lemma"=>"in", "word"=>"in", "POS"=>"IN"}, 
-            {"lemma"=>"the", "word"=>"the", "POS"=>"DT"}, 
-            {"lemma"=>"hat", "word"=>"hat", "POS"=>"NN", "meaning"=>"hat_n_01", "definition"=>"headdress that protects the head from bad weather; has shaped crown and usually a brim"}, 
-            {"lemma"=>".", "word"=>".", "POS"=>"."}
+            {"lemma"=>"cat", "word"=>"cat", "POS"=>"NN", "meaning"=>"cat_n_01", "definition"=>"feline mammal usually having thick soft fur and no ability to roar: domestic cats; wildcats", "score"=>0.7683740822870486}, 
+            {"lemma"=>"in", "word"=>"in", "POS"=>"IN", "score"=>0.9999999999999999}, 
+            {"lemma"=>"the", "word"=>"the", "POS"=>"DT", "score"=>0.9999999999999999}, 
+            {"lemma"=>"hat", "word"=>"hat", "POS"=>"NN", "meaning"=>"hat_n_01", "definition"=>"headdress that protects the head from bad weather; has shaped crown and usually a brim", "score"=>0.9999999999999999}, 
+            {"lemma"=>".", "word"=>".", "POS"=>".", "score"=>0.9999999999999999}
             ])
     end    
     
@@ -112,9 +148,9 @@ RESPONSE
           
         @first_variant[0].expand(fake_neighbours, 3, 0.8).sort {|x,y| y.to_s <=> x.to_s }.should eql(
           [
-            { 'lemma' => 'expansion', 'word' => 'expansion', 'POS'=>'NN', 'meaning' => 'cat_expanded_1' }, 
-            { 'lemma' => 'expansion', 'word' => 'expansion', 'POS'=>'NN', 'meaning' => 'cat_expanded_2' }, 
-            { 'lemma' => 'expansion', 'word' => 'expansion', 'POS'=>'NN', 'meaning' => 'cat_expanded_3' }, 
+            { 'lemma' => 'expansion', 'word' => 'expansion', 'POS'=>'NN', 'meaning' => 'cat_expanded_1', "score"=>0.0 }, 
+            { 'lemma' => 'expansion', 'word' => 'expansion', 'POS'=>'NN', 'meaning' => 'cat_expanded_2', "score"=>0.0 }, 
+            { 'lemma' => 'expansion', 'word' => 'expansion', 'POS'=>'NN', 'meaning' => 'cat_expanded_3', "score"=>0.0 }, 
           ].sort {|x,y| y.to_s <=> x.to_s })
           
         expected_result = 
@@ -161,7 +197,7 @@ RESPONSE
 
     it "#variants should return one sentence variant" do
       @sentence.variants.should_not eql([])
-      @sentence.variants.should eql([[{"word"=>"All", "lemma"=>"All", "POS"=>"DT"}, {"word"=>"genuflect", "lemma"=>"genuflect", "POS"=>"VB"}, {"word"=>"before", "lemma"=>"before", "POS"=>"IN"}, {"word"=>"me", "lemma"=>"me", "POS"=>"PRP"}]])
+      @sentence.variants.should eql([[{"word"=>"All", "lemma"=>"All", "POS"=>"DT", "score"=>1.0}, {"word"=>"genuflect", "lemma"=>"genuflect", "POS"=>"VB", "score"=>1.0}, {"word"=>"before", "lemma"=>"before", "POS"=>"IN", "score"=>1.0}, {"word"=>"me", "lemma"=>"me", "POS"=>"PRP", "score"=>1.0}]])
       @sentence.variants.map(&:score).should eql([1.0])
       @sentence.variants.map(&:index).should eql([0])
     end
@@ -182,7 +218,7 @@ RESPONSE
 
     it "#variants should return one sentence variant" do
       @sentence.variants.should_not eql([])
-      @sentence.variants.should eql([[{"term"=>"ingham", "lemma"=>"ingham", "word"=>"ingham", "POS"=>"NN", "offset"=>0}]])
+      @sentence.variants.should eql([[{"term"=>"ingham", "lemma"=>"ingham", "word"=>"ingham", "POS"=>"NN", "offset"=>0, "score"=>1.0}]])
       @sentence.variants.map(&:score).should eql([1.0])
       @sentence.variants.map(&:index).should eql([0])
     end

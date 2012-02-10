@@ -71,17 +71,33 @@ class DisambiguatedSentence
   end
 
   def variants
-    original.terms.map do | term | 
-      (Array.new(scores.size > 0 ? scores.size : 1) { | i | ResolvedTerm.new(term, i) }).flatten
+    resolved_terms = {}
+    resolved_sentences = original.terms.each_with_index.map do | term, index | 
+      (Array.new(scores.size > 0 ? scores.size : 1) { | rank | resolved_term_for_term(resolved_terms, term, index, rank) }).flatten
     end.transpose.each_with_index.map { | array_of_resolved_terms, i | ResolvedSentence.new(array_of_resolved_terms, scores[i] || 1.0, i)  } 
+    
+    resolved_sentences.each_with_index do | resolved_sentence, i |
+      resolved_sentence.each do | resolved_term |
+        resolved_term.score = resolved_term.score + resolved_sentence.score
+      end
+    end
+    
+    resolved_sentences
   end
-
+  
   def variants_text
     variants.map() { | variant | variant.map(&:to_s) }
   end
 
   def sentence_variants
     variants_text.map { | s | s.join(' ') }
+  end
+
+  private 
+  def resolved_term_for_term(resolved_terms, term, index, rank)
+    resolved_term = ResolvedTerm.new(term, rank)
+    
+    resolved_terms[[resolved_term.to_s,index]] ||= resolved_term
   end
 
 end
@@ -132,6 +148,7 @@ class ResolvedTerm < Hash
     super()
     
     self.merge!(term.except('meanings'))
+    self.score = 0.0
     
     if term['meanings'] and (term.meanings.count > i)
       self.meaning = term.meanings[i].meaning; 
