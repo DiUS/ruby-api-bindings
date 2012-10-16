@@ -1,18 +1,18 @@
+require 'uri'
+require 'net/http'
+
 require File.expand_path('disambiguated_result', File.dirname(__FILE__))
 
 class Disambiguator
 
-  attr_reader :address
-  attr_reader :port
+  attr_reader :app_id
+  attr_reader :app_key
+  attr_reader :url
 
-  attr_reader :customer_id
-  attr_reader :api_key
-
-  def initialize(customer_id, api_key, address, port = 3001)
-    @customer_id = customer_id
-    @api_key = api_key
-    @address = address
-    @port = port
+  def initialize(app_id, app_key, url)
+    @app_id = app_id
+    @app_key = app_key
+    @url = url
   end
 
   def disambiguate(text)
@@ -33,18 +33,25 @@ class Disambiguator
 
   def call_service(text)
     params = {}
-    params[:api_key] = api_key unless api_key.nil?
-    params[:customer_id] = customer_id unless customer_id.nil?
+    params[:app_key] = app_key unless app_key.nil?
+    params[:app_id] = app_id unless app_id.nil?
+    params[:body] = text
     
     params_s = encode_parameters(params)
+    uri = URI("#{url}?#{params_s}")
+
+    request = Net::HTTP::Get.new(uri.request_uri)
     
-    Net::HTTP.start(@address, @port) do |client|
-      client.open_timeout = 120
-      client.read_timeout = 120
-      client.post("/disambiguate?#{params_s}", text).body
+    Net::HTTP.start(uri.host, uri.port) do | http |
+      http.open_timeout = 120
+      http.read_timeout = 120
+
+      response = http.request(request)
+
+      response.body
     end
   rescue => e
-    raise "Disambiguator #{@address}:#{@port} - Error while disambiguating '#{text}': #{e}"
+    raise "Disambiguator #{url} - Error while disambiguating '#{text}': #{e}"
   end
 
   def encode_parameters(parameters = {})
