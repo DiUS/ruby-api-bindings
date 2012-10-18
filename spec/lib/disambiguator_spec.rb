@@ -3,16 +3,16 @@ require File.expand_path(File.dirname(__FILE__) + '/../../lib/springsense-ruby')
 
 describe Disambiguator do
 
-  URL = "http://api.springsense.com:8081/v1/disambiguate"
-  APP_ID = "0b331fdb"
-  APP_KEY = "c1f02a931ae759f8d6584812ef9e1859"
+  URL = "https://springsense.p.mashape.com/disambiguate"
+  PUBLIC_KEY = ENV['MASHAPE_PUBLIC_KEY']
+  PRIVATE_KEY = ENV['MASHAPE_PRIVATE_KEY']
 
-  let(:disambiguator) { Disambiguator.new(APP_ID, APP_KEY, URL) }
+  let(:disambiguator) { Disambiguator.new(PUBLIC_KEY, PRIVATE_KEY, URL) }
 
   it "should initialize correctly" do
     disambiguator.url.should == URL
-    disambiguator.app_id.should == APP_ID
-    disambiguator.app_key.should == APP_KEY
+    disambiguator.public_key.should == PUBLIC_KEY
+    disambiguator.private_key.should == PRIVATE_KEY
   end
 
   it "should disambiguate correctly" do
