@@ -17,7 +17,7 @@ class Disambiguator
   end
 
   def disambiguate(text)
-    response = Mashape::HttpClient.do_request(:get, url, { body: text }, :form, :json, authentication_handlers)
+    response = Mashape::HttpClient.do_request(:get, url, { "body" => text }, :form, :json, authentication_handlers)
     result = DisambiguatedResult.from_response(response.raw_body)
 
     result.text_variants_in_rank_order
