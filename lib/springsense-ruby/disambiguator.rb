@@ -11,7 +11,7 @@ class Disambiguator
 
   def initialize(mashape_key,  url)
     @mashape_key = mashape_key
-    @authentication_handlers = mashape_key.nil? ? nil : [ Mashape::MashapeAuthentication.new(mashape_key) ]
+    @authentication_handlers = mashape_key.nil? ? [] : [ Mashape::MashapeAuthentication.new(mashape_key) ]
     @url = url
   end
 
