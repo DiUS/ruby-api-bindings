@@ -6,13 +6,12 @@ require File.expand_path('disambiguated_result', File.dirname(__FILE__))
 
 class Disambiguator
 
-  attr_reader :public_key
-  attr_reader :private_key
+  attr_reader :mashape_key
   attr_reader :url
 
-  def initialize(public_key, private_key, url)
-    @public_key = public_key
-    @private_key = private_key
+  def initialize(mashape_key,  url)
+    @mashape_key = mashape_key
+    @authentication_handlers = mashape_key.nil? ? nil : [ Mashape::MashapeAuthentication.new(mashape_key) ]
     @url = url
   end
 
@@ -28,7 +27,7 @@ class Disambiguator
   private
 
   def authentication_handlers
-    @authentication_handlers ||= [ Mashape::MashapeAuthentication.new(public_key, private_key) ]
+    @authentication_handlers
   end
 
   def prepare_text(text)
